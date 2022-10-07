@@ -1,18 +1,27 @@
 version: '3.9'
 
+x-backend_environment: &backend_environment
+  environment:
+    - TLS
+    - ENVIRONMENT
+    - DATABASE_URL
+    - DEBUG
+    - LOG_LEVEL
+    - JSON_LOGS
+
 services:
   backend:
     build:
       context: backend
       dockerfile: backend/Dockerfile
-    command: uvicorn application.web.main:app --reload --host 0.0.0.0
+    command: uvicorn main:app --reload --host 0.0.0.0
     restart: always
     ports:
       - '8000:8000'
     tty: true
+    <<: *backend_environment
     volumes:
       - ./backend:/backend
-    env_file: backend/.env
 
   db:
     image: postgres:13.4
@@ -20,4 +29,7 @@ services:
       - 5432
     ports:
       - "5432:5432"
-    env_file: backend/.env
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB

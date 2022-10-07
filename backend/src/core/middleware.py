@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import FastAPI, status
+from fastapi import status
 from fastapi.responses import JSONResponse
 from pydantic.error_wrappers import ValidationError
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -34,8 +34,3 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             )
 
         return response
-
-
-def init_middleware(app: FastAPI) -> None:
-    """Initialize all middlewares in application."""
-    app.add_middleware(ExceptionMiddleware)

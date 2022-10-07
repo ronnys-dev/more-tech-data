@@ -1,6 +1,6 @@
-include backend/.env
+include .env
 export
-e=backend/.env
+e=.env
 
 
 main.py:  # Запустить основное приложение

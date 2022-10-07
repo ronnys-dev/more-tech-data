@@ -1,10 +1,8 @@
 import logging
 import sys
 
-from common.config import AppConfig
+from config import settings
 from loguru import logger
-
-app_config = AppConfig()
 
 
 class InterceptHandler(logging.Handler):
@@ -29,7 +27,7 @@ class InterceptHandler(logging.Handler):
 def init_logging() -> None:
     # intercept everything at the root logger
     logging.root.handlers = [InterceptHandler()]
-    logging.root.setLevel(app_config.log_level)
+    logging.root.setLevel(settings.LOG_LEVEL)
 
     # remove every other logger's handlers
     # and propagate to root logger
@@ -38,4 +36,4 @@ def init_logging() -> None:
         logging.getLogger(name).propagate = True
 
     # configure loguru
-    logger.configure(handlers=[{"sink": sys.stdout, "serialize": app_config.json_logs}])
+    logger.configure(handlers=[{"sink": sys.stdout, "serialize": settings.JSON_LOGS}])

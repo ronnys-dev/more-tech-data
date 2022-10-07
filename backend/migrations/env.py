@@ -2,44 +2,26 @@ import asyncio
 from logging.config import fileConfig
 
 from alembic import context
-from common.config import AppConfig, DatabaseConfig
-from repository.database.base import Base
-from repository.product.product_db_repo import ProductDBModel  # noqa
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlmodel import SQLModel
 
-app_config = AppConfig()
-database_config = DatabaseConfig()
+# import all your models here!!!
 
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-db_url = database_config.database_url
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)  # type: ignore
 
-config.set_main_option("sqlalchemy.url", db_url)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-
-target_metadata = [Base.metadata]
-
-# for app in database_config.apps:
-#     try:
-#         i = importlib.import_module("repository.{}.models".format(app))
-#     except ModuleNotFoundError:
-#         continue
-#
-#     if len(target_metadata) > 0:
-#         continue
-#     elif hasattr(i, "__all__") and len(i.__all__) > 0:
-#         model = i.__all__[0]
-#         target_metadata.append(getattr(i, model).metadata)
+target_metadata = SQLModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
