@@ -2,6 +2,7 @@ from application.web.exceptions import error_responses
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import JSONResponse
 
+from .product.api import router as product_router
 
 api_router = APIRouter(
     default_response_class=JSONResponse,
@@ -10,6 +11,7 @@ api_router = APIRouter(
 
 
 # api routers
+api_router.include_router(product_router, prefix="/products", tags=["product"])
 
 
 @api_router.get("/health_check", include_in_schema=False)

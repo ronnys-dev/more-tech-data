@@ -3,7 +3,9 @@ from functools import lru_cache
 import punq  # type: ignore
 from common.config import AppConfig, DatabaseConfig
 from domain.base import UseCaseMeta
+from domain.product.repos import IProductRepo
 from repository.database.database import DatabaseResource
+from repository.product.product_db_repo import ProductDBRepo
 
 
 @lru_cache(maxsize=1)
@@ -24,6 +26,7 @@ def _initialize_container() -> punq.Container:
     container.register(DatabaseResource, factory=DatabaseResource)
 
     # Repos
+    container.register(IProductRepo, factory=ProductDBRepo)  # type: ignore[misc]
 
     # Use Cases
     for use_case in UseCaseMeta.registered_use_cases:
