@@ -14,6 +14,10 @@ WORKDIR /backend
 
 COPY --from=requirements-stage /tmp/requirements.txt /backend/requirements.txt
 
+RUN apk update && apk add python3-dev \
+                        gcc \
+                        libc-dev
+
 RUN pip install --no-cache-dir --upgrade -r /backend/requirements.txt
 
 COPY . /backend
