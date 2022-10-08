@@ -1,35 +1,21 @@
 version: '3.9'
 
-x-backend_environment: &backend_environment
-  environment:
-    - TLS
-    - ENVIRONMENT
-    - DATABASE_URL
-    - DEBUG
-    - LOG_LEVEL
-    - JSON_LOGS
-
 services:
   backend:
     build:
       context: backend
-      dockerfile: backend/Dockerfile
+      dockerfile: Dockerfile
     command: uvicorn main:app --reload --host 0.0.0.0
     restart: always
     ports:
       - '8000:8000'
     tty: true
-    <<: *backend_environment
     volumes:
       - ./backend:/backend
 
-  db:
-    image: postgres:13.4
+  selenium:
+    image: seleniarm/standalone-chromium:latest
     expose:
-      - 5432
+      - '4444'
     ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-      - POSTGRES_DB
+      - '4444:4444'

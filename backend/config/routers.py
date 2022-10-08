@@ -4,6 +4,8 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from src.news.api import router as news_router
+
 
 class ErrorMessage(BaseModel):
     msg: str
@@ -26,7 +28,7 @@ api_router = APIRouter(
 
 
 # api routers
-# api_router.include_router()
+api_router.include_router(news_router)
 
 
 @api_router.get("/healthcheck", include_in_schema=False)
