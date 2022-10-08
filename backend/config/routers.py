@@ -28,11 +28,11 @@ api_router = APIRouter(
 
 
 # api routers
-api_router.include_router(news_router)
+api_router.include_router(news_router, tags=['News'], prefix='/news')
 
 
-@api_router.get("/healthcheck", include_in_schema=False)
-def healthcheck() -> dict[str, str]:
+@api_router.get("/health_check", include_in_schema=False)
+def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 

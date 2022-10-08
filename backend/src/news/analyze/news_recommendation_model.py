@@ -1,23 +1,15 @@
-import io
-import pandas as pd
-import sklearn
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
-from sklearn.feature_extraction.text import TfidfVectorizer
-from collections import Counter
-from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-import re
-import numpy as np
-from sklearn.pipeline import Pipeline
-from nltk import sent_tokenize, word_tokenize, regexp_tokenize
-from pymorphy2 import MorphAnalyzer
-from natasha import NamesExtractor, MorphVocab
-from sklearn.preprocessing import StandardScaler
 import pickle
 
+import numpy as np
+import pandas as pd
+from natasha import MorphVocab, NamesExtractor
+from nltk import regexp_tokenize
+from pymorphy2 import MorphAnalyzer
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
-with open('dct_word_final.pickle', 'rb') as f:
+with open('/backend/src/news/analyze/dct_word_final.pickle', 'rb') as f:
     dct_words = pickle.load(f)
 
 names_extractor = NamesExtractor(MorphVocab())
@@ -35,7 +27,7 @@ def read_from_file(file):
         if not s:
             break
         lst.append(s)
-    return pd.DataFrame(lst, columns = ["text"])
+    return pd.DataFrame(lst, columns=["text"])
 
 
 def pos(word):
@@ -48,8 +40,7 @@ def delete(row: str) -> str:
 
 
 def tokenize_n_normalize(sent, pat=r"(?u)\b\w\w+\b"):
-    return [morph.parse(tok)[0].normal_form
-            for tok in regexp_tokenize(sent, pat)]
+    return [morph.parse(tok)[0].normal_form for tok in regexp_tokenize(sent, pat)]
 
 
 def have_name(row: str) -> bool:
@@ -64,6 +55,7 @@ class NewsPreprocessor(StandardScaler):
     """
     Preprocessor, making matrix of matches from list of news texts
     """
+
     def __init__(self, min_word_amount: int = 100, min_difference: float = 0.5):
         super().__init__()
         self.min_word_amount = min_word_amount
@@ -78,10 +70,12 @@ class NewsPreprocessor(StandardScaler):
         X = X.apply(delete).map(lambda x: " ".join(tokenize_n_normalize(x)))
         flag_for_name = X.apply(have_name)
 
-        preprocess_dict = {key: val for key, val in dct_words.items()
-                           if val[0] > self.min_word_amount and
-                           abs(val[1] - val[2]) > self.min_difference}
-        res_df = pd.DataFrame(columns=preprocess_dict.keys(), index = X.index)
+        preprocess_dict = {
+            key: val
+            for key, val in dct_words.items()
+            if val[0] > self.min_word_amount and abs(val[1] - val[2]) > self.min_difference
+        }
+        res_df = pd.DataFrame(columns=preprocess_dict.keys(), index=X.index)
         res_df["text"] = np.array(X)
         for key in preprocess_dict.keys():
             res_df[key] = X.apply(lambda x: key in x)
@@ -99,6 +93,7 @@ class NewsModel(LinearRegression):
     """
     Regression that gives numeric priority for news
     """
+
     def __init__(self, method='linear'):
         super().__init__()
         self.method = method
@@ -120,14 +115,18 @@ class NewsModel(LinearRegression):
         self.fit(X, y)
         return self.predict(X)
 
-    def score(self, X = pd.DataFrame, y: pd.Series = None) -> float:
+    def score(self, X=pd.DataFrame, y: pd.Series = None) -> float:
         return super().score(X, y)
 
 
 def get_recommendations(df, role: str) -> dict[str, list[str]]:
     df = pd.Series(dict(df))
-    news_pipe = Pipeline(steps=[('prep', NewsPreprocessor(min_word_amount=200, min_difference=0.4)),
-                                ('model', NewsModel())])
+    news_pipe = Pipeline(
+        steps=[
+            ('prep', NewsPreprocessor(min_word_amount=200, min_difference=0.4)),
+            ('model', NewsModel()),
+        ]
+    )
     scores = list(news_pipe.fit_predict(df).sort_values().index)
     if role == 'accountant':
         return scores[:3]
