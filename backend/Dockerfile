@@ -1,22 +1,12 @@
-FROM python:3.10-slim as requirements-stage
-
-WORKDIR /tmp
-
-RUN pip install poetry
-
-COPY pyproject.toml ./poetry.lock* /tmp/
-
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
-
-FROM python:3.10-alpine
+FROM python:3.9-slim
 
 WORKDIR /backend
 
-COPY --from=requirements-stage /tmp/requirements.txt /backend/requirements.txt
+RUN apt update && apt install -y python3-dev gcc libc-dev
 
-RUN apk update && apk add python3-dev \
-                        gcc \
-                        libc-dev
+RUN pip install --upgrade pip
+
+COPY requirements.txt requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /backend/requirements.txt
 
